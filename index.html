@@ -13,6 +13,22 @@
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Study Header Hide/Show on Scroll */
+        #study-header { 
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top center;
+        }
+        #study-header.hide-header { 
+            transform: translateY(-120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        #study-header.show-header { 
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         /* Test Mode Styles */
         .option-btn { transition: all 0.2s; }
         .option-btn:hover:not(:disabled) { transform: translateX(-5px); background-color: #f1f5f9; }
@@ -81,7 +97,7 @@
     <!-- ================= STUDY VIEW (FULL PAGE GUIDE) ================= -->
     <div id="study-view" class="flex-1 w-full max-w-4xl mx-auto px-4 py-6 fade-in hidden">
         <!-- Header Controls -->
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 sticky top-12 z-40 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div id="study-header" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 sticky top-12 z-40 flex flex-col sm:flex-row justify-between items-center gap-4 show-header">
             <div>
                 <h2 id="study-title" class="text-2xl font-bold text-slate-800">Section Title</h2>
                 <p id="study-count" class="text-slate-500 font-medium text-sm mt-1">X أسئلة بالشرح والشفرات</p>
@@ -728,6 +744,34 @@
 
         // Init App
         renderDashboard();
+
+        // Scroll detection for study header hide/show
+        let lastScrollTopStudy = 0;
+        let scrollDirectionStudy = 'up';
+        const studyHeader = document.getElementById('study-header');
+        let scrollThresholdStudy = 50;
+
+        window.addEventListener('scroll', () => {
+            if (!studyHeader || studyHeader.offsetParent === null) return;
+            
+            const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (currentScroll > lastScrollTopStudy + scrollThresholdStudy) {
+                if (scrollDirectionStudy !== 'down') {
+                    scrollDirectionStudy = 'down';
+                    studyHeader.classList.remove('show-header');
+                    studyHeader.classList.add('hide-header');
+                }
+            } else if (currentScroll < lastScrollTopStudy - scrollThresholdStudy) {
+                if (scrollDirectionStudy !== 'up') {
+                    scrollDirectionStudy = 'up';
+                    studyHeader.classList.remove('hide-header');
+                    studyHeader.classList.add('show-header');
+                }
+            }
+            
+            lastScrollTopStudy = currentScroll <= 0 ? 0 : currentScroll;
+        });
     </script>
 </body>
 </html>
